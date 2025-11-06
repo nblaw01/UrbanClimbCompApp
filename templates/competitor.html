@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Competitor {{ competitor.id }} · Urban Climb Comp</title>
+<link rel="stylesheet" href="/static/app.css" />
+</head>
+<body>
+<main class="container">
+<header class="header">
+<h1>Competitor #{{ competitor.id }}</h1>
+<a class="back" href="/">Switch competitor</a>
+</header>
+
+
+<section class="grid">
+{% for n in climbs %}
+{% set s = existing.get(n) %}
+<div class="climb-card" data-climb="{{ n }}">
+<h2>Climb {{ n }}</h2>
+<div class="row">
+<label>Attempts</label>
+<input type="number" min="0" max="50" value="{{ s.attempts if s else 0 }}" class="attempts" />
+</div>
+<div class="row">
+<label class="check">
+<input type="checkbox" class="topped" {% if s and s.topped %}checked{% endif %}/> Topped
+</label>
+</div>
+<button class="save">Save</button>
+<div class="status" aria-live="polite"></div>
+</div>
+{% endfor %}
+</section>
+
+
+<section class="summary">
+<h3>Summary</h3>
+<ul id="summary-list"></ul>
+</section>
+</main>
+
+
+<script>
+const competitorId = {{ competitor.id }};
+const cards = document.querySelectorAll('.climb-card');
+
+
+function showStatus(el, msg, ok=true){
+el.textContent = msg;
+el.className = 'status ' + (ok ? 'ok' : 'err');
+setTimeout(()=>{ el.textContent=''; el.className='status'; }, 1500);
+}
+
+
+async function save(card){
+const climb = parseInt(card.dataset.climb);
+const attempts = parseInt(card.querySelector('.attempts').value || '0');
+const topped = card.querySelector('.topped').checked;
+const status = card.querySelector('.status');
+try {
+const res = await fetch('/api/score', {
+</html>
